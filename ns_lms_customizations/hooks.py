@@ -10,6 +10,8 @@ fixtures = [
 	{"dt": "Client Script", "filters": [["dt", "=", "User"]]},
 ]
 
+page_renderer = ["ns_lms_customizations.zoho.ZohoCreateUserRenderer"]
+
 # Apps
 # ------------------
 
