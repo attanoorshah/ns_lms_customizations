@@ -1,0 +1,13 @@
+[
+ {
+  "docstatus": 0,
+  "doctype": "Client Script",
+  "dt": "User",
+  "enabled": 1,
+  "modified": "2026-09-23 11:59:51.798463",
+  "module": "NS-LMS Customizations",
+  "name": "ns_user_organization_department_filter",
+  "script": "frappe.ui.form.on(\"User\", {\n\trefresh(frm) {\n\t\tfrm.set_query(\"ns_department\", () => ({\n\t\t\tfilters: { organization: frm.doc.ns_organization || \"\" },\n\t\t}));\n\t},\n\tns_organization(frm) {\n\t\tfrm.set_value(\"ns_department\", \"\");\n\t\tfrm.set_query(\"ns_department\", () => ({\n\t\t\tfilters: { organization: frm.doc.ns_organization || \"\" },\n\t\t}));\n\t},\n});\n",
+  "view": "Form"
+ }
+]

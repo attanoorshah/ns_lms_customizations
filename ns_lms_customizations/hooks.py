@@ -5,6 +5,11 @@ app_description = "Custom app for lms.globalnorthstar.net"
 app_email = "admin@globalnorthstar.net"
 app_license = "mit"
 
+fixtures = [
+	{"dt": "Custom Field", "filters": [["dt", "in", ["User", "LMS Course"]]]},
+	{"dt": "Client Script", "filters": [["dt", "=", "User"]]},
+]
+
 # Apps
 # ------------------
 
