@@ -22,6 +22,10 @@ class ZohoCreateUserRenderer:
 			result, status = {"error": str(e)}, 409
 		except frappe.ValidationError as e:
 			result, status = {"error": str(e)}, 400
+		except Exception:
+			frappe.db.rollback()
+			frappe.log_error(title="Zoho create-user webhook error")
+			result, status = {"error": "Internal server error"}, 500
 		return Response(json.dumps(result), status=status, mimetype="application/json")
 
 
