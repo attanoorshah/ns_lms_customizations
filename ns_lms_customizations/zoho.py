@@ -1,7 +1,35 @@
-import json
-
 import frappe
 from werkzeug.wrappers import Response
+
+PAGE = """<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>{title}</title>
+<style>
+	body {{ font-family: -apple-system, Segoe UI, Roboto, Arial, sans-serif;
+		display: flex; align-items: center; justify-content: center;
+		min-height: 100vh; margin: 0; background: #f5f6f8; color: #1f2328; }}
+	.card {{ background: #fff; border-radius: 10px; padding: 2.5rem 3rem;
+		box-shadow: 0 1px 3px rgba(0,0,0,.1); text-align: center; max-width: 420px; }}
+	.icon {{ font-size: 2.5rem; margin-bottom: .75rem; }}
+	h1 {{ font-size: 1.15rem; margin: 0 0 .4rem; }}
+	p {{ color: #57606a; margin: 0; font-size: .95rem; }}
+</style>
+</head>
+<body>
+	<div class="card">
+		<div class="icon">{icon}</div>
+		<h1>{title}</h1>
+		<p>{message}</p>
+	</div>
+</body>
+</html>"""
+
+
+def page(title, message, icon, status):
+	return Response(PAGE.format(title=title, message=message, icon=icon), status=status, mimetype="text/html")
 
 
 class ZohoCreateUserRenderer:
@@ -14,19 +42,18 @@ class ZohoCreateUserRenderer:
 
 	def render(self):
 		try:
-			result = create_user_from_zoho(frappe.local.request.args)
-			status = 200
+			email = create_user_from_zoho(frappe.local.request.args)
+			return page("User created", f"{email} has been added to the LMS.", "✅", 200)
 		except frappe.PermissionError:
-			result, status = {"error": "Invalid or missing token"}, 403
-		except frappe.DuplicateEntryError as e:
-			result, status = {"error": str(e)}, 409
+			return page("Not authorized", "This link is not valid.", "⛔", 403)
+		except frappe.DuplicateEntryError:
+			return page("Already exists", "This email or user already exists.", "⚠️", 409)
 		except frappe.ValidationError as e:
-			result, status = {"error": str(e)}, 400
+			return page("Missing information", str(e), "⚠️", 400)
 		except Exception:
 			frappe.db.rollback()
 			frappe.log_error(title="Zoho create-user webhook error")
-			result, status = {"error": "Internal server error"}, 500
-		return Response(json.dumps(result), status=status, mimetype="application/json")
+			return page("Something went wrong", "Please try again or contact support.", "❌", 500)
 
 
 def create_user_from_zoho(args):
@@ -58,4 +85,4 @@ def create_user_from_zoho(args):
 	user.insert(ignore_permissions=True)
 	frappe.db.commit()
 
-	return {"success": True, "user": user.name}
+	return user.name
